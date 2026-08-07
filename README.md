@@ -1,9 +1,11 @@
 # Meguri
 
+[English](README.en.md) | 日本語
+
 Meguri は、短い WEBP アニメーション、MP4 動画、PNG/JPEG 画像を一覧で同時に確認し、
 不要なファイルをすばやくゴミ箱へ送るための Windows デスクトップツールです。
 
-![Meguri icon](assets/icon.png)
+![Meguri preview](assets/preview.gif)
 
 ## 機能
 
@@ -117,6 +119,7 @@ $cli = "build\windows-msvc-release\apps\meguri_cli\Meguri_CLI.exe"
 ## 詳細情報
 
 - [TECHNICAL.md](TECHNICAL.md): 構成、検証コマンド、GPU 再生、性能メモ
+- [README.en.md](README.en.md): English README
 - [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md): サードパーティライブラリの表記
 
 ## ライセンス
