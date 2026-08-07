@@ -1,0 +1,23 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch Meguri GUI",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/windows-msvc-debug/apps/meguri_gui/Meguri.exe",
+      "args": ["samples/input"],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Launch Meguri CLI (scan)",
+      "type": "cppvsdbg",
+      "request": "launch",
+      "program": "${workspaceFolder}/build/windows-msvc-debug/apps/meguri_cli/Meguri_CLI.exe",
+      "args": ["scan", "samples/input"],
+      "stopAtEntry": false,
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}

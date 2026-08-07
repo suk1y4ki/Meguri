@@ -1,0 +1,7 @@
+* text=auto
+*.png binary
+*.ico binary
+*.webp binary
+*.mp4 binary
+# .ps1 は BOM 付き UTF-8 で保存する (PowerShell 5.1 対応。BOM はファイル内容として保持)
+*.ps1 text
