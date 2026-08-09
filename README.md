@@ -24,6 +24,30 @@ Meguri は、短い WEBP アニメーション、MP4/WMV/AVI 動画、PNG/JPEG �
 - 対応環境では動画を GPU ゼロコピー再生し、失敗時は自動でソフトウェア再生にフォールバック
 - 設定とプローブキャッシュは既定で EXE と同じフォルダに保存し、AppData 保存にも切り替え可能
 
+## 使い方
+
+`Meguri.exe` を起動し、表示したいメディアフォルダを開くかドロップします。
+
+| 操作 | 内容 |
+| --- | --- |
+| クリック | 選択 |
+| Ctrl+クリック | 追加選択 |
+| Shift+クリック | 範囲選択 |
+| Ctrl+A | 表示中の項目を全選択 |
+| Del | 選択項目をゴミ箱へ移動 |
+| Ctrl+Z | 直前の削除バッチを復元 |
+| ダブルクリック / Enter | 拡大表示 |
+| Esc / 拡大表示中のダブルクリック | 一覧へ戻る |
+| 拡大表示中の矢印キー / ホイール | 前後の項目へ移動 |
+| 拡大表示中の Space | 再生 / 一時停止 |
+| Ctrl+ホイール | タイルサイズ調整 |
+
+起動引数でフォルダを渡すこともできます。
+
+```powershell
+build\vs2022\apps\meguri_gui\Release\Meguri.exe <folder>
+```
+
 ## 必要環境
 
 - Windows
@@ -66,30 +90,6 @@ cmake --build --preset build-release
 ctest --preset test-release --output-on-failure
 ```
 
-## 使い方
-
-`Meguri.exe` を起動し、表示したいメディアフォルダを開くかドロップします。
-
-| 操作 | 内容 |
-| --- | --- |
-| クリック | 選択 |
-| Ctrl+クリック | 追加選択 |
-| Shift+クリック | 範囲選択 |
-| Ctrl+A | 表示中の項目を全選択 |
-| Del | 選択項目をゴミ箱へ移動 |
-| Ctrl+Z | 直前の削除バッチを復元 |
-| ダブルクリック / Enter | 拡大表示 |
-| Esc / 拡大表示中のダブルクリック | 一覧へ戻る |
-| 拡大表示中の矢印キー / ホイール | 前後の項目へ移動 |
-| 拡大表示中の Space | 再生 / 一時停止 |
-| Ctrl+ホイール | タイルサイズ調整 |
-
-起動引数でフォルダを渡すこともできます。
-
-```powershell
-build\vs2022\apps\meguri_gui\Release\Meguri.exe <folder>
-```
-
 ## CLI
 
 `Meguri_CLI.exe` は検証、サンプル生成、ベンチマーク向けの補助ツールです。
@@ -117,5 +117,6 @@ $cli = "build\vs2022\apps\meguri_cli\Release\Meguri_CLI.exe"
 
 ## ライセンス
 
-MIT License。サードパーティライブラリについては
+MIT License
+サードパーティライブラリについては
 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) を参照してください。

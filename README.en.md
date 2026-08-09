@@ -25,6 +25,30 @@ unwanted files to the Recycle Bin.
 - GPU zero-copy video playback on supported systems, with automatic software fallback
 - Portable settings and probe cache next to the EXE by default, with an AppData storage option
 
+## Usage
+
+Start `Meguri.exe`, then open or drop a media folder.
+
+| Operation | Action |
+| --- | --- |
+| Click | Select |
+| Ctrl+click | Toggle selection |
+| Shift+click | Select a range |
+| Ctrl+A | Select all visible items |
+| Del | Move selected items to the Recycle Bin |
+| Ctrl+Z | Restore the last delete batch |
+| Double-click / Enter | Open zoom view |
+| Esc / double-click in zoom view | Return to grid view |
+| Arrow keys / wheel in zoom view | Move to the previous or next item |
+| Space in zoom view | Play / pause |
+| Ctrl+wheel | Adjust tile size |
+
+You can also pass a folder path as the first argument:
+
+```powershell
+build\vs2022\apps\meguri_gui\Release\Meguri.exe <folder>
+```
+
 ## Requirements
 
 - Windows
@@ -70,30 +94,6 @@ cmake --build --preset build-release
 ctest --preset test-release --output-on-failure
 ```
 
-## Usage
-
-Start `Meguri.exe`, then open or drop a media folder.
-
-| Operation | Action |
-| --- | --- |
-| Click | Select |
-| Ctrl+click | Toggle selection |
-| Shift+click | Select a range |
-| Ctrl+A | Select all visible items |
-| Del | Move selected items to the Recycle Bin |
-| Ctrl+Z | Restore the last delete batch |
-| Double-click / Enter | Open zoom view |
-| Esc / double-click in zoom view | Return to grid view |
-| Arrow keys / wheel in zoom view | Move to the previous or next item |
-| Space in zoom view | Play / pause |
-| Ctrl+wheel | Adjust tile size |
-
-You can also pass a folder path as the first argument:
-
-```powershell
-build\vs2022\apps\meguri_gui\Release\Meguri.exe <folder>
-```
-
 ## CLI
 
 `Meguri_CLI.exe` is a helper tool for validation, sample generation, and
@@ -117,9 +117,11 @@ $cli = "build\vs2022\apps\meguri_cli\Release\Meguri_CLI.exe"
 
 ## More Information
 
+- [README.md](README.md): Japanese README
 - [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md): third-party library notices
 
 ## License
 
-MIT License. See [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) for
-third-party libraries.
+MIT License
+For third-party libraries, see
+[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
