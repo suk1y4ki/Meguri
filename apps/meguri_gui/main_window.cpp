@@ -907,7 +907,7 @@ void MainWindow::update_status() {
     swprintf(text, 256, tr(Str::StatusFmt), shown, webp, mp4, wmv, avi, png, jpeg,
              static_cast<int>(grid_.selection_count()));
     std::wstring status = text;
-    if (settings_.show_filenames && grid_.selection_count() > 0) {
+    if (settings_.show_filenames && !grid_.zoomed() && grid_.selection_count() > 0) {
         const std::vector<int> selected = grid_.selected_engine_indices();
         if (!selected.empty()) {
             const int first = selected.front();
