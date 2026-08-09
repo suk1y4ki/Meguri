@@ -47,6 +47,7 @@ enum : int {
     IDM_SEEKBAR = 246,
     IDM_INTRO_OFFSET = 247,
     IDM_GRID_AUDIO = 248,
+    IDM_SHOW_FILENAMES = 249,
     IDM_ROWH_SMALL = 250,  // 小 / 中 / 大 / 特大 (連番)
     IDM_ROWH_MEDIUM,
     IDM_ROWH_LARGE,
@@ -477,6 +478,11 @@ void MainWindow::on_command(int id) {
             grid_.set_show_seekbar(settings_.show_seekbar);
             rebuild_menu();
             return;
+        case IDM_SHOW_FILENAMES:
+            settings_.show_filenames = !settings_.show_filenames;
+            update_status();
+            rebuild_menu();
+            return;
         case IDM_INTRO_OFFSET:
             settings_.intro_offset = !settings_.intro_offset;
             engine_.set_intro_offset(settings_.intro_offset);
@@ -773,6 +779,8 @@ void MainWindow::rebuild_menu() {
                 IDM_CONFIRM_DELETE, tr(Str::MenuConfirmDelete));
     AppendMenuW(options, MF_STRING | (settings_.show_seekbar ? MF_CHECKED : 0), IDM_SEEKBAR,
                 tr(Str::MenuSeekbar));
+    AppendMenuW(options, MF_STRING | (settings_.show_filenames ? MF_CHECKED : 0),
+                IDM_SHOW_FILENAMES, tr(Str::MenuShowFilenames));
     AppendMenuW(options, MF_STRING | (settings_.intro_offset ? MF_CHECKED : 0),
                 IDM_INTRO_OFFSET, tr(Str::MenuIntroOffset));
     AppendMenuW(options, MF_STRING | (settings_.grid_audio ? MF_CHECKED : 0), IDM_GRID_AUDIO,
@@ -858,7 +866,26 @@ void MainWindow::update_status() {
     wchar_t text[192];
     swprintf(text, 192, tr(Str::StatusFmt), shown, webp, mp4, png, jpeg,
              static_cast<int>(grid_.selection_count()));
-    set_status(text);
+    std::wstring status = text;
+    if (settings_.show_filenames && grid_.selection_count() > 0) {
+        const std::vector<int> selected = grid_.selected_engine_indices();
+        if (!selected.empty()) {
+            const int first = selected.front();
+            if (first >= 0 && first < static_cast<int>(library_.size())) {
+                const std::wstring& path = library_[first].path;
+                const size_t pos = path.find_last_of(L"\\/");
+                const std::wstring name =
+                    pos == std::wstring::npos ? path : path.substr(pos + 1);
+                status += L"   ";
+                status += name;
+                if (selected.size() > 1) {
+                    status += L" +";
+                    status += std::to_wstring(selected.size() - 1);
+                }
+            }
+        }
+    }
+    set_status(status);
 }
 
 void MainWindow::store_probe_results() {

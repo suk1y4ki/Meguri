@@ -56,6 +56,9 @@ struct Settings {
     // ズーム中のシークバー表示
     bool show_seekbar = true;
 
+    // 選択中ファイル名をステータスバーに表示
+    bool show_filenames = false;
+
     // ズーム中の音声 (単体再生時のみ音を出す)
     int audio_volume = 60;     // 0〜100
     bool audio_muted = false;

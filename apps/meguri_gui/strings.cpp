@@ -70,6 +70,8 @@ const Entry& entry_for(Str id) {
         {L"デバッグ情報を表示 (計測値)", L"Show debug overlay (metrics)"},
         /* MenuSeekbar */
         {L"拡大表示でシークバーを表示", L"Show seek bar in zoom view"},
+        /* MenuShowFilenames */
+        {L"選択ファイル名をステータスバーに表示", L"Show selected file name in status bar"},
         /* MenuIntroOffset */
         {L"イントロを飛ばす (5 分以上は 3:00 から)", L"Skip intro (5min+ starts at 3:00)"},
         /* MenuGridAudio */

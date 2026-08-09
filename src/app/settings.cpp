@@ -248,6 +248,7 @@ Settings load_settings() {
     s.confirm_delete = j.value("confirm_delete", s.confirm_delete);
     s.debug_overlay = j.value("debug_overlay", s.debug_overlay);
     s.show_seekbar = j.value("show_seekbar", s.show_seekbar);
+    s.show_filenames = j.value("show_filenames", s.show_filenames);
     s.audio_volume = j.value("audio_volume", s.audio_volume);
     s.audio_muted = j.value("audio_muted", s.audio_muted);
     s.grid_audio = j.value("grid_audio", s.grid_audio);
@@ -281,6 +282,7 @@ bool save_settings(const Settings& s) {
     j["confirm_delete"] = s.confirm_delete;
     j["debug_overlay"] = s.debug_overlay;
     j["show_seekbar"] = s.show_seekbar;
+    j["show_filenames"] = s.show_filenames;
     j["audio_volume"] = s.audio_volume;
     j["audio_muted"] = s.audio_muted;
     j["grid_audio"] = s.grid_audio;

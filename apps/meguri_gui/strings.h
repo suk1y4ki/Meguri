@@ -46,6 +46,7 @@ enum class Str {
     MenuConfirmDelete,
     MenuDebugOverlay,
     MenuSeekbar,
+    MenuShowFilenames,
     MenuIntroOffset,
     MenuGridAudio,
     MenuGpuMemory,
