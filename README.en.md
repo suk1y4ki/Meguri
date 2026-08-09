@@ -29,27 +29,32 @@ unwanted files to the Recycle Bin.
 
 - Windows
 - Visual Studio 2022 Community or Build Tools with MSVC
-- Ninja bundled with Visual Studio
 - CMake 3.25 or later
 
 MP4/WMV/AVI support uses Windows Media Foundation. FFmpeg and external codec
 packages are not required.
 
-## Build
+## Create a Distribution Folder
 
 Run from the repository root:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\make_dist.ps1
+```
+
+This runs a Release build, tests, and install, then collects the minimal
+distribution into `dist\Meguri`. Third-party license files are copied to
+`dist\Meguri\licenses`.
+
+## Development Build
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts\dev_build.ps1 -Release
 ```
 
-The script configures, builds, and runs tests. If `cl` or `ninja` is not on
-`PATH`, it loads the Visual Studio developer shell automatically.
-
-Main outputs:
-
-- `build\windows-msvc-release\apps\meguri_gui\Meguri.exe`
-- `build\windows-msvc-release\apps\meguri_cli\Meguri_CLI.exe`
+The script configures, builds, and runs tests with the Visual Studio 2022 CMake
+generator. Build outputs stay under `build\vs2022`; use `dist\Meguri` for files
+you intend to package or publish.
 
 Debug build:
 
@@ -60,20 +65,10 @@ powershell -ExecutionPolicy Bypass -File scripts\dev_build.ps1
 Manual CMake commands:
 
 ```powershell
-cmake --preset windows-msvc-release
+cmake --preset vs2022
 cmake --build --preset build-release
 ctest --preset test-release --output-on-failure
 ```
-
-## Create a Distribution Folder
-
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts\make_dist.ps1
-```
-
-This runs a Release build, tests, and install, then collects the minimal
-distribution into `dist\Meguri`. Third-party license files are copied to
-`dist\Meguri\licenses`.
 
 ## Usage
 
@@ -96,7 +91,7 @@ Start `Meguri.exe`, then open or drop a media folder.
 You can also pass a folder path as the first argument:
 
 ```powershell
-build\windows-msvc-release\apps\meguri_gui\Meguri.exe samples\input
+build\vs2022\apps\meguri_gui\Release\Meguri.exe <folder>
 ```
 
 ## CLI
@@ -115,14 +110,13 @@ Meguri_CLI.exe gensample <folder> [--webp <n>] [--mp4 <n>] [--large]
 Example:
 
 ```powershell
-$cli = "build\windows-msvc-release\apps\meguri_cli\Meguri_CLI.exe"
-& $cli gensample samples\input --webp 12 --mp4 12
-& $cli info samples\input
+$cli = "build\vs2022\apps\meguri_cli\Release\Meguri_CLI.exe"
+& $cli gensample tmp\samples --webp 12 --mp4 12
+& $cli info tmp\samples
 ```
 
 ## More Information
 
-- [TECHNICAL.md](TECHNICAL.md): architecture, validation commands, GPU playback, and performance notes
 - [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md): third-party library notices
 
 ## License

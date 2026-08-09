@@ -5,7 +5,7 @@
       "name": "Launch Meguri GUI",
       "type": "cppvsdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/build/windows-msvc-debug/apps/meguri_gui/Meguri.exe",
+      "program": "${workspaceFolder}/build/vs2022/apps/meguri_gui/Debug/Meguri.exe",
       "args": ["samples/input"],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}"
@@ -14,7 +14,7 @@
       "name": "Launch Meguri CLI (scan)",
       "type": "cppvsdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/build/windows-msvc-debug/apps/meguri_cli/Meguri_CLI.exe",
+      "program": "${workspaceFolder}/build/vs2022/apps/meguri_cli/Debug/Meguri_CLI.exe",
       "args": ["scan", "samples/input"],
       "stopAtEntry": false,
       "cwd": "${workspaceFolder}"

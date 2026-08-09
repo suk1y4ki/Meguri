@@ -1,11 +1,20 @@
 ﻿# ズーム往復・最大化後も再生と新規読み込みが継続することを検証する E2E。
 # (Debug ビルドのテストフックとアプリ内蔵キャプチャを使用)
 param(
-    [string]$Folder = "samples\heavy"
+    [string]$Folder = "tmp\e2e-heavy"
 )
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 Set-Location $root
+
+$cli = "build\vs2022\apps\meguri_cli\Debug\Meguri_CLI.exe"
+if (-not (Test-Path $Folder)) {
+    if (-not (Test-Path $cli)) {
+        throw "Debug CLI not found. Run: cmake --build --preset build-debug"
+    }
+    & $cli gensample $Folder --webp 12 --mp4 12 | Out-Null
+}
+New-Item -ItemType Directory -Force tmp\e2e-output | Out-Null
 
 Add-Type @"
 using System;
@@ -39,15 +48,15 @@ function Get-CaptureHash([string]$path) {
 }
 
 function Assert-Playing([IntPtr]$hwnd, [string]$label) {
-    $h1 = Get-CaptureHash "samples\output\zr_a.png"
+    $h1 = Get-CaptureHash "tmp\e2e-output\zr_a.png"
     Start-Sleep -Milliseconds 700
-    $h2 = Get-CaptureHash "samples\output\zr_b.png"
+    $h2 = Get-CaptureHash "tmp\e2e-output\zr_b.png"
     if ($h1 -eq $h2) { throw "$label : 画面が変化していない (再生停止)" }
     Write-Host "$label : 再生継続 OK"
 }
 
 Get-Process Meguri -ErrorAction SilentlyContinue | Stop-Process -Force -Confirm:$false
-Start-Process "build\windows-msvc-debug\apps\meguri_gui\Meguri.exe" -ArgumentList "`"$root\$Folder`""
+Start-Process "build\vs2022\apps\meguri_gui\Debug\Meguri.exe" -ArgumentList "`"$root\$Folder`""
 Start-Sleep -Seconds 5
 $proc = Get-Process Meguri | Where-Object { $_.MainWindowHandle -ne 0 } | Select-Object -First 1
 $hwnd = $proc.MainWindowHandle

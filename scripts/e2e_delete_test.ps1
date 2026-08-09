@@ -4,9 +4,9 @@ $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 Set-Location $root
 
-$cli = "build\windows-msvc-debug\apps\meguri_cli\Meguri_CLI.exe"
-$gui = "build\windows-msvc-debug\apps\meguri_gui\Meguri.exe"
-$testDir = Join-Path $root "samples\deltest"
+$cli = "build\vs2022\apps\meguri_cli\Debug\Meguri_CLI.exe"
+$gui = "build\vs2022\apps\meguri_gui\Debug\Meguri.exe"
+$testDir = Join-Path $root "tmp\e2e-delete"
 
 Add-Type @"
 using System;
@@ -65,7 +65,8 @@ Write-Host "files after undo: $afterUndo"
 if ($afterUndo -ne $before) { throw "undo did not restore the file" }
 
 # 5. スクリーンショットも残す
-powershell -ExecutionPolicy Bypass -File scripts\capture_app.ps1 -Out samples\output\e2e_delete.png | Out-Null
+New-Item -ItemType Directory -Force tmp\e2e-output | Out-Null
+powershell -ExecutionPolicy Bypass -File scripts\capture_app.ps1 -Out tmp\e2e-output\e2e_delete.png | Out-Null
 
 Get-Process Meguri -ErrorAction SilentlyContinue | Stop-Process -Force -Confirm:$false
 Write-Host "E2E delete/undo test PASSED"

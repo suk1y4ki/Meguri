@@ -28,26 +28,29 @@ Meguri は、短い WEBP アニメーション、MP4/WMV/AVI 動画、PNG/JPEG �
 
 - Windows
 - Visual Studio 2022 Community または Build Tools の MSVC
-- Visual Studio 同梱の Ninja
 - CMake 3.25 以上
 
 MP4/WMV/AVI の処理には Windows 標準の Media Foundation を使用します。FFmpeg や外部コーデックの同梱は不要です。
 
-## ビルド
+## 配布フォルダ作成
 
 リポジトリ直下で実行します。
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\make_dist.ps1
+```
+
+Release ビルド、テスト、install を実行し、配布に必要な最小構成を `dist\Meguri` に集約します。
+サードパーティのライセンス全文は `dist\Meguri\licenses` にコピーされます。
+
+## 開発用ビルド
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts\dev_build.ps1 -Release
 ```
 
-このスクリプトは configure、build、test をまとめて実行します。`cl` や `ninja` が
-`PATH` に無い場合は Visual Studio の開発者シェルを自動で読み込みます。
-
-主な出力先:
-
-- `build\windows-msvc-release\apps\meguri_gui\Meguri.exe`
-- `build\windows-msvc-release\apps\meguri_cli\Meguri_CLI.exe`
+このスクリプトは Visual Studio 2022 の CMake generator で configure、build、test をまとめて実行します。
+ビルド出力は `build\vs2022` 配下に置かれます。配布や公開に使うファイルは `dist\Meguri` を使ってください。
 
 Debug ビルド:
 
@@ -58,19 +61,10 @@ powershell -ExecutionPolicy Bypass -File scripts\dev_build.ps1
 手動で実行する場合:
 
 ```powershell
-cmake --preset windows-msvc-release
+cmake --preset vs2022
 cmake --build --preset build-release
 ctest --preset test-release --output-on-failure
 ```
-
-## 配布フォルダ作成
-
-```powershell
-powershell -ExecutionPolicy Bypass -File scripts\make_dist.ps1
-```
-
-Release ビルド、テスト、install を実行し、`dist\Meguri` に最小構成を集約します。
-サードパーティのライセンス全文は `dist\Meguri\licenses` にコピーされます。
 
 ## 使い方
 
@@ -79,7 +73,7 @@ Release ビルド、テスト、install を実行し、`dist\Meguri` に最小�
 | 操作 | 内容 |
 | --- | --- |
 | クリック | 選択 |
-| Ctrl+クリック | 選択の切り替え |
+| Ctrl+クリック | 追加選択 |
 | Shift+クリック | 範囲選択 |
 | Ctrl+A | 表示中の項目を全選択 |
 | Del | 選択項目をゴミ箱へ移動 |
@@ -93,7 +87,7 @@ Release ビルド、テスト、install を実行し、`dist\Meguri` に最小�
 起動引数でフォルダを渡すこともできます。
 
 ```powershell
-build\windows-msvc-release\apps\meguri_gui\Meguri.exe samples\input
+build\vs2022\apps\meguri_gui\Release\Meguri.exe <folder>
 ```
 
 ## CLI
@@ -111,14 +105,13 @@ Meguri_CLI.exe gensample <folder> [--webp <n>] [--mp4 <n>] [--large]
 例:
 
 ```powershell
-$cli = "build\windows-msvc-release\apps\meguri_cli\Meguri_CLI.exe"
-& $cli gensample samples\input --webp 12 --mp4 12
-& $cli info samples\input
+$cli = "build\vs2022\apps\meguri_cli\Release\Meguri_CLI.exe"
+& $cli gensample tmp\samples --webp 12 --mp4 12
+& $cli info tmp\samples
 ```
 
 ## 詳細情報
 
-- [TECHNICAL.md](TECHNICAL.md): 構成、検証コマンド、GPU 再生、性能メモ
 - [README.en.md](README.en.md): English README
 - [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md): サードパーティライブラリの表記
 
