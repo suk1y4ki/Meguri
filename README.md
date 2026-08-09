@@ -118,5 +118,6 @@ $cli = "build\vs2022\apps\meguri_cli\Release\Meguri_CLI.exe"
 ## ライセンス
 
 MIT License
+
 サードパーティライブラリについては
 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md) を参照してください。
