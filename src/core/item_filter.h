@@ -10,6 +10,8 @@ namespace meguri::core {
 struct FilterOptions {
     bool show_webp = true;
     bool show_mp4 = true;
+    bool show_wmv = false;
+    bool show_avi = false;
     bool show_png = true;
     bool show_jpeg = true;
 };

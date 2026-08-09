@@ -2,7 +2,7 @@
 
 [English](README.en.md) | 日本語
 
-Meguri は、短い WEBP アニメーション、MP4 動画、PNG/JPEG 画像を一覧で同時に確認し、
+Meguri は、短い WEBP アニメーション、MP4/WMV/AVI 動画、PNG/JPEG 画像を一覧で同時に確認し、
 不要なファイルをすばやくゴミ箱へ送るための Windows デスクトップツールです。
 
 ![Meguri preview](assets/preview.gif)
@@ -10,18 +10,18 @@ Meguri は、短い WEBP アニメーション、MP4 動画、PNG/JPEG 画像を
 ## 機能
 
 - フォルダを開く、起動引数で渡す、またはドラッグ＆ドロップで読み込み
-- WEBP アニメーションと MP4 動画をジャスティファイドレイアウトで同時再生
+- WEBP アニメーションと MP4/WMV/AVI 動画をジャスティファイドレイアウトで同時再生
 - PNG/JPEG 画像も同じ一覧で表示し、選択・拡大・削除・復元を共通操作で実行
 - クリック、Ctrl+クリック、Shift+クリック、Ctrl+A による選択
 - Del で選択ファイルをゴミ箱へ移動、Ctrl+Z で直前の削除バッチを復元
 - ダブルクリックまたは Enter で 1 件を拡大表示
 - 拡大表示中のシーク、再生/一時停止、前後移動、削除して次を表示、音声再生
 - 一覧表示中の動画音声を同時再生する実験的オプション
-- WEBP / MP4 / PNG / JPG の種類別フィルタとサブフォルダ走査
+- WEBP / MP4 / WMV / AVI / PNG / JPG の種類別フィルタとサブフォルダ走査 (WMV/AVI は初期OFF)
 - 名前、更新日時、サイズでの並び替え
 - タイルサイズの切り替えと Ctrl+ホイールによる連続調整
 - ダークモード既定、ライトモード、日本語/英語 UI、Per-Monitor V2 DPI 対応
-- 対応環境では MP4 を GPU ゼロコピー再生し、失敗時は自動でソフトウェア再生にフォールバック
+- 対応環境では動画を GPU ゼロコピー再生し、失敗時は自動でソフトウェア再生にフォールバック
 - 設定とプローブキャッシュは既定で EXE と同じフォルダに保存し、AppData 保存にも切り替え可能
 
 ## 必要環境
@@ -31,7 +31,7 @@ Meguri は、短い WEBP アニメーション、MP4 動画、PNG/JPEG 画像を
 - Visual Studio 同梱の Ninja
 - CMake 3.25 以上
 
-MP4 の処理には Windows 標準の Media Foundation を使用します。FFmpeg や外部コーデックの同梱は不要です。
+MP4/WMV/AVI の処理には Windows 標準の Media Foundation を使用します。FFmpeg や外部コーデックの同梱は不要です。
 
 ## ビルド
 

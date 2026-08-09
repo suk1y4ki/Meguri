@@ -15,11 +15,13 @@ enum class Str {
     OpenFolder,
     FilterWebp,
     FilterMp4,
+    FilterWmv,
+    FilterAvi,
     FilterPng,
     FilterJpeg,
     Recursive,
     StatusNoFolder,      // フォルダを開いてください
-    StatusFmt,           // %d 件 (WEBP %d / MP4 %d)  選択 %d
+    StatusFmt,           // %d 件 (WEBP %d / MP4 %d / WMV %d / AVI %d / PNG %d / JPG %d)  選択 %d
     StatusLoadingFmt,    // 読み込み中... %d/%d
     StatusDeletedFmt,    // %d 件をゴミ箱へ移動しました (Ctrl+Z で元に戻す)
     StatusRestoredFmt,   // %d 件を復元しました

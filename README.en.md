@@ -3,26 +3,26 @@
 English | [日本語](README.md)
 
 Meguri is a Windows desktop tool for quickly reviewing many short WEBP
-animations, MP4 videos, PNG images, and JPEG images, then moving unwanted files
-to the Recycle Bin.
+animations, MP4/WMV/AVI videos, PNG images, and JPEG images, then moving
+unwanted files to the Recycle Bin.
 
 ![Meguri preview](assets/preview.gif)
 
 ## Features
 
 - Open a folder with the folder picker, a command-line argument, or drag and drop
-- Play WEBP animations and MP4 videos together in a justified grid layout
+- Play WEBP animations and MP4/WMV/AVI videos together in a justified grid layout
 - Show PNG/JPEG images in the same grid with the same select, zoom, delete, and restore operations
 - Select with click, Ctrl+click, Shift+click, and Ctrl+A
 - Move selected files to the Recycle Bin with Del, and restore the last delete batch with Ctrl+Z
 - Open a single item in zoom view with double-click or Enter
 - Seek, play/pause, move between items, delete-and-advance, and play audio in zoom view
 - Optional experimental audio playback for videos visible in the grid
-- File type filters for WEBP, MP4, PNG, and JPG, plus optional subfolder scanning
+- File type filters for WEBP, MP4, WMV, AVI, PNG, and JPG, plus optional subfolder scanning (WMV/AVI are off by default)
 - Sort by name, modified time, or file size
 - Switch tile sizes or adjust them continuously with Ctrl+wheel
 - Dark mode by default, light mode, Japanese/English UI, and Per-Monitor V2 DPI support
-- GPU zero-copy MP4 playback on supported systems, with automatic software fallback
+- GPU zero-copy video playback on supported systems, with automatic software fallback
 - Portable settings and probe cache next to the EXE by default, with an AppData storage option
 
 ## Requirements
@@ -32,8 +32,8 @@ to the Recycle Bin.
 - Ninja bundled with Visual Studio
 - CMake 3.25 or later
 
-MP4 support uses Windows Media Foundation. FFmpeg and external codec packages
-are not required.
+MP4/WMV/AVI support uses Windows Media Foundation. FFmpeg and external codec
+packages are not required.
 
 ## Build
 

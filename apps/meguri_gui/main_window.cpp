@@ -26,6 +26,8 @@ enum : int {
     IDC_BTN_OPEN = 100,
     IDC_CHK_WEBP,
     IDC_CHK_MP4,
+    IDC_CHK_WMV,
+    IDC_CHK_AVI,
     IDC_CHK_PNG,
     IDC_CHK_JPEG,
     IDC_CHK_RECURSIVE,
@@ -151,6 +153,12 @@ void MainWindow::on_create() {
     chk_mp4_ = CreateWindowExW(0, L"BUTTON", tr(Str::FilterMp4),
                                WS_CHILD | WS_VISIBLE | BS_OWNERDRAW, 0, 0, 10, 10, hwnd_,
                                reinterpret_cast<HMENU>(IDC_CHK_MP4), instance_, nullptr);
+    chk_wmv_ = CreateWindowExW(0, L"BUTTON", tr(Str::FilterWmv),
+                               WS_CHILD | WS_VISIBLE | BS_OWNERDRAW, 0, 0, 10, 10, hwnd_,
+                               reinterpret_cast<HMENU>(IDC_CHK_WMV), instance_, nullptr);
+    chk_avi_ = CreateWindowExW(0, L"BUTTON", tr(Str::FilterAvi),
+                               WS_CHILD | WS_VISIBLE | BS_OWNERDRAW, 0, 0, 10, 10, hwnd_,
+                               reinterpret_cast<HMENU>(IDC_CHK_AVI), instance_, nullptr);
     chk_png_ = CreateWindowExW(0, L"BUTTON", tr(Str::FilterPng),
                                WS_CHILD | WS_VISIBLE | BS_OWNERDRAW, 0, 0, 10, 10, hwnd_,
                                reinterpret_cast<HMENU>(IDC_CHK_PNG), instance_, nullptr);
@@ -229,6 +237,7 @@ LRESULT MainWindow::handle_message(UINT msg, WPARAM wparam, LPARAM lparam) {
             // ボタンのオーナードロー (開く = アクションボタン、WEBP / MP4 = トグル)
             const DRAWITEMSTRUCT* dis = reinterpret_cast<DRAWITEMSTRUCT*>(lparam);
             if (dis->CtlID != IDC_CHK_WEBP && dis->CtlID != IDC_CHK_MP4 &&
+                dis->CtlID != IDC_CHK_WMV && dis->CtlID != IDC_CHK_AVI &&
                 dis->CtlID != IDC_CHK_PNG && dis->CtlID != IDC_CHK_JPEG &&
                 dis->CtlID != IDC_BTN_OPEN) {
                 break;
@@ -239,6 +248,8 @@ LRESULT MainWindow::handle_message(UINT msg, WPARAM wparam, LPARAM lparam) {
             const bool checked =
                 is_toggle && (dis->CtlID == IDC_CHK_WEBP   ? settings_.show_webp
                               : dis->CtlID == IDC_CHK_MP4  ? settings_.show_mp4
+                              : dis->CtlID == IDC_CHK_WMV  ? settings_.show_wmv
+                              : dis->CtlID == IDC_CHK_AVI  ? settings_.show_avi
                               : dis->CtlID == IDC_CHK_PNG  ? settings_.show_png
                                                            : settings_.show_jpeg);
             const bool pressed = (dis->itemState & ODS_SELECTED) != 0;
@@ -412,6 +423,24 @@ void MainWindow::on_command(int id) {
             InvalidateRect(chk_mp4_, nullptr, TRUE);
             rebuild_display_order();
             return;
+        case IDC_CHK_WMV:
+            settings_.show_wmv = !settings_.show_wmv;
+            InvalidateRect(chk_wmv_, nullptr, TRUE);
+            if (settings_.show_wmv && !current_folder_.empty()) {
+                open_folder(current_folder_);
+            } else {
+                rebuild_display_order();
+            }
+            return;
+        case IDC_CHK_AVI:
+            settings_.show_avi = !settings_.show_avi;
+            InvalidateRect(chk_avi_, nullptr, TRUE);
+            if (settings_.show_avi && !current_folder_.empty()) {
+                open_folder(current_folder_);
+            } else {
+                rebuild_display_order();
+            }
+            return;
         case IDC_CHK_PNG:
             settings_.show_png = !settings_.show_png;
             InvalidateRect(chk_png_, nullptr, TRUE);
@@ -547,6 +576,8 @@ void MainWindow::layout_children() {
     place(btn_open_, MulDiv(130, dpi_, 96));
     place(chk_webp_, MulDiv(70, dpi_, 96));
     place(chk_mp4_, MulDiv(70, dpi_, 96));
+    place(chk_wmv_, MulDiv(70, dpi_, 96));
+    place(chk_avi_, MulDiv(70, dpi_, 96));
     place(chk_png_, MulDiv(70, dpi_, 96));
     place(chk_jpeg_, MulDiv(70, dpi_, 96));
     place(chk_recursive_, MulDiv(130, dpi_, 96));
@@ -565,7 +596,8 @@ void MainWindow::update_dpi(UINT dpi) {
     lf.lfHeight = -MulDiv(12, dpi_, 96);
     wcscpy_s(lf.lfFaceName, L"Segoe UI");
     ui_font_ = CreateFontIndirectW(&lf);
-    for (HWND ctl : {btn_open_, chk_webp_, chk_mp4_, chk_png_, chk_jpeg_, chk_recursive_}) {
+    for (HWND ctl : {btn_open_, chk_webp_, chk_mp4_, chk_wmv_, chk_avi_, chk_png_, chk_jpeg_,
+                     chk_recursive_}) {
         SendMessageW(ctl, WM_SETFONT, reinterpret_cast<WPARAM>(ui_font_), TRUE);
     }
     grid_.set_row_height(scaled_row_height());
@@ -606,6 +638,8 @@ void MainWindow::open_folder(const std::wstring& folder) {
 
     io::ScanOptions options;
     options.recursive = settings_.recursive;
+    options.include_wmv = settings_.show_wmv;
+    options.include_avi = settings_.show_avi;
     library_ = io::scan_folder(folder, options);
     probe_cache_.apply(&library_);  // キャッシュ一致分はプローブ不要になる
     deleted_.assign(library_.size(), false);
@@ -624,6 +658,8 @@ void MainWindow::rebuild_display_order() {
     core::FilterOptions filter;
     filter.show_webp = settings_.show_webp;
     filter.show_mp4 = settings_.show_mp4;
+    filter.show_wmv = settings_.show_wmv;
+    filter.show_avi = settings_.show_avi;
     filter.show_png = settings_.show_png;
     filter.show_jpeg = settings_.show_jpeg;
     core::SortOptions sort;
@@ -799,6 +835,8 @@ void MainWindow::apply_language() {
     SetWindowTextW(btn_open_, tr(Str::OpenFolder));
     SetWindowTextW(chk_webp_, tr(Str::FilterWebp));
     SetWindowTextW(chk_mp4_, tr(Str::FilterMp4));
+    SetWindowTextW(chk_wmv_, tr(Str::FilterWmv));
+    SetWindowTextW(chk_avi_, tr(Str::FilterAvi));
     SetWindowTextW(chk_png_, tr(Str::FilterPng));
     SetWindowTextW(chk_jpeg_, tr(Str::FilterJpeg));
     SetWindowTextW(chk_recursive_, tr(Str::Recursive));
@@ -852,19 +890,21 @@ void MainWindow::update_status() {
         store_probe_results();
     }
 
-    int shown = 0, webp = 0, mp4 = 0, png = 0, jpeg = 0;
+    int shown = 0, webp = 0, mp4 = 0, wmv = 0, avi = 0, png = 0, jpeg = 0;
     for (int engine_index : grid_.display_order()) {
         if (engine_index < 0 || engine_index >= static_cast<int>(library_.size())) continue;
         ++shown;
         switch (library_[engine_index].type) {
             case core::MediaType::Webp: ++webp; break;
             case core::MediaType::Mp4: ++mp4; break;
+            case core::MediaType::Wmv: ++wmv; break;
+            case core::MediaType::Avi: ++avi; break;
             case core::MediaType::Png: ++png; break;
             case core::MediaType::Jpeg: ++jpeg; break;
         }
     }
-    wchar_t text[192];
-    swprintf(text, 192, tr(Str::StatusFmt), shown, webp, mp4, png, jpeg,
+    wchar_t text[256];
+    swprintf(text, 256, tr(Str::StatusFmt), shown, webp, mp4, wmv, avi, png, jpeg,
              static_cast<int>(grid_.selection_count()));
     std::wstring status = text;
     if (settings_.show_filenames && grid_.selection_count() > 0) {

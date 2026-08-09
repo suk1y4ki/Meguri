@@ -57,6 +57,8 @@ private:
     HWND btn_open_ = nullptr;
     HWND chk_webp_ = nullptr;
     HWND chk_mp4_ = nullptr;
+    HWND chk_wmv_ = nullptr;
+    HWND chk_avi_ = nullptr;
     HWND chk_png_ = nullptr;
     HWND chk_jpeg_ = nullptr;
     HWND chk_recursive_ = nullptr;

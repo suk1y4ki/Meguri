@@ -28,6 +28,14 @@ bool classify(const fs::path& p, core::MediaType* out_type) {
         *out_type = core::MediaType::Mp4;
         return true;
     }
+    if (ext == L".wmv") {
+        *out_type = core::MediaType::Wmv;
+        return true;
+    }
+    if (ext == L".avi") {
+        *out_type = core::MediaType::Avi;
+        return true;
+    }
     if (ext == L".png") {
         *out_type = core::MediaType::Png;
         return true;
@@ -39,11 +47,19 @@ bool classify(const fs::path& p, core::MediaType* out_type) {
     return false;
 }
 
-void append_entry(const fs::directory_entry& entry, std::vector<core::MediaItem>* out) {
+bool include_type(core::MediaType type, const ScanOptions& options) {
+    if (type == core::MediaType::Wmv) return options.include_wmv;
+    if (type == core::MediaType::Avi) return options.include_avi;
+    return true;
+}
+
+void append_entry(const fs::directory_entry& entry, const ScanOptions& options,
+                  std::vector<core::MediaItem>* out) {
     std::error_code ec;
     if (!entry.is_regular_file(ec) || ec) return;
     core::MediaType type;
     if (!classify(entry.path(), &type)) return;
+    if (!include_type(type, options)) return;
 
     core::MediaItem item;
     item.path = entry.path().wstring();
@@ -76,12 +92,12 @@ std::vector<core::MediaItem> scan_folder(const std::wstring& folder, const ScanO
     if (options.recursive) {
         for (fs::recursive_directory_iterator it(folder, dir_options, ec), end;
              !ec && it != end; it.increment(ec)) {
-            append_entry(*it, &items);
+            append_entry(*it, options, &items);
         }
     } else {
         for (fs::directory_iterator it(folder, dir_options, ec), end; !ec && it != end;
              it.increment(ec)) {
-            append_entry(*it, &items);
+            append_entry(*it, options, &items);
         }
     }
     std::sort(items.begin(), items.end(),

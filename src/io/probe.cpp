@@ -7,7 +7,7 @@
 namespace meguri::io {
 
 std::unique_ptr<core::IMediaDecoder> create_decoder(core::MediaType type) {
-    if (type == core::MediaType::Mp4) return std::make_unique<Mp4Decoder>();
+    if (core::is_media_foundation_video(type)) return std::make_unique<Mp4Decoder>();
     if (type == core::MediaType::Png || type == core::MediaType::Jpeg) {
         return std::make_unique<ImageDecoder>();
     }

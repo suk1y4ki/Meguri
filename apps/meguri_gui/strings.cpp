@@ -29,6 +29,8 @@ const Entry& entry_for(Str id) {
         /* OpenFolder */ {L"フォルダを開く...", L"Open Folder..."},
         /* FilterWebp */ {L"WEBP", L"WEBP"},
         /* FilterMp4 */ {L"MP4", L"MP4"},
+        /* FilterWmv */ {L"WMV", L"WMV"},
+        /* FilterAvi */ {L"AVI", L"AVI"},
         /* FilterPng */ {L"PNG", L"PNG"},
         /* FilterJpeg */ {L"JPG", L"JPG"},
         /* Recursive */ {L"サブフォルダ", L"Subfolders"},
@@ -36,8 +38,8 @@ const Entry& entry_for(Str id) {
         {L"フォルダを開くかドロップしてください。クリックで選択 / Del でゴミ箱へ / Ctrl+Z で復元",
          L"Open or drop a folder. Click to select, Del to recycle, Ctrl+Z to restore"},
         /* StatusFmt */
-        {L"%d 件 (WEBP %d / MP4 %d / PNG %d / JPG %d)   選択 %d",
-         L"%d items (WEBP %d / MP4 %d / PNG %d / JPG %d)   %d selected"},
+        {L"%d 件 (WEBP %d / MP4 %d / WMV %d / AVI %d / PNG %d / JPG %d)   選択 %d",
+         L"%d items (WEBP %d / MP4 %d / WMV %d / AVI %d / PNG %d / JPG %d)   %d selected"},
         /* StatusLoadingFmt */
         {L"ファイル情報を取得中... %d/%d (次回からはキャッシュで即時)",
          L"Reading file info... %d/%d (cached for next time)"},

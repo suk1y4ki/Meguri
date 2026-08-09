@@ -623,7 +623,7 @@ void GridView::start_zoom_audio() {
         return;
     }
     auto* t = engine_->tile(display_order_[zoom_display_index_]);
-    if (!t || t->item.type != core::MediaType::Mp4) return;  // 音声があるのは MP4 のみ
+    if (!t || !core::is_media_foundation_video(t->item.type)) return;
     if (!audio_.open(t->item.path)) return;                  // 音声ストリーム無し等
     apply_audio_state();
     int64_t pts = 0;
@@ -717,7 +717,7 @@ void GridView::update_grid_audio(const std::vector<int>& visible_list, int64_t n
         if (grid_audio_skip_.count(engine_index)) return;
         if (std::find(targets.begin(), targets.end(), engine_index) != targets.end()) return;
         auto* t = engine_->tile(engine_index);
-        if (!t || t->item.type != core::MediaType::Mp4) return;  // 音声があるのは MP4 のみ
+        if (!t || !core::is_media_foundation_video(t->item.type)) return;
         targets.push_back(engine_index);
     };
     add_target(hover_index_);
@@ -1358,12 +1358,14 @@ void GridView::draw_debug_overlay(const std::vector<int>& visible_list,
         const double size_mb = static_cast<double>(t->item.file_size) / (1024.0 * 1024.0);
         const double dec_ms = t->decode_us_ema.load() / 1000.0;
         const int open_ms = t->open_ms.load();
-        // MP4 以外は CPU デコードが正規の経路 (橙判定の対象外)
-        const bool cpu_native = t->item.type != core::MediaType::Mp4;
+        // Media Foundation video 以外は CPU デコードが正規の経路 (橙判定の対象外)
+        const bool cpu_native = !core::is_media_foundation_video(t->item.type);
         const wchar_t* codec_label =
             t->item.type == core::MediaType::Webp   ? L"WEBP(CPU)"
             : t->item.type == core::MediaType::Png  ? L"PNG(CPU)"
             : t->item.type == core::MediaType::Jpeg ? L"JPG(CPU)"
+            : t->item.type == core::MediaType::Wmv  ? (t->hardware ? L"WMV(GPU)" : L"WMV(CPU)")
+            : t->item.type == core::MediaType::Avi  ? (t->hardware ? L"AVI(GPU)" : L"AVI(CPU)")
                                                     : (t->hardware ? L"GPU" : L"CPU");
 
         wchar_t text[256];
@@ -1404,7 +1406,7 @@ void GridView::draw_debug_overlay(const std::vector<int>& visible_list,
     int dec_gpu = 0, dec_cpu = 0;
     for (int display_index : active_list) {
         auto* t = engine_->tile(display_order_[display_index]);
-        if (!t || t->item.type != core::MediaType::Mp4) continue;
+        if (!t || !core::is_media_foundation_video(t->item.type)) continue;
         if (t->decode_us_ema.load() == 0) continue;  // まだ動いていないものは除外
         if (t->hardware) {
             ++dec_gpu;

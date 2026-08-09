@@ -40,6 +40,8 @@ void print_usage() {
 const wchar_t* type_name(core::MediaType type) {
     switch (type) {
         case core::MediaType::Mp4: return L"MP4";
+        case core::MediaType::Wmv: return L"WMV";
+        case core::MediaType::Avi: return L"AVI";
         case core::MediaType::Png: return L"PNG";
         case core::MediaType::Jpeg: return L"JPG";
         case core::MediaType::Webp: break;

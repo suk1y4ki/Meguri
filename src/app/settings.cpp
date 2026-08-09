@@ -239,6 +239,8 @@ Settings load_settings() {
     s.recursive = j.value("recursive", s.recursive);
     s.show_webp = j.value("show_webp", s.show_webp);
     s.show_mp4 = j.value("show_mp4", s.show_mp4);
+    s.show_wmv = j.value("show_wmv", s.show_wmv);
+    s.show_avi = j.value("show_avi", s.show_avi);
     s.show_png = j.value("show_png", s.show_png);
     s.show_jpeg = j.value("show_jpeg", s.show_jpeg);
     s.sort_key = sort_key_from_name(j.value("sort_key", std::string("name")));
@@ -273,6 +275,8 @@ bool save_settings(const Settings& s) {
     j["recursive"] = s.recursive;
     j["show_webp"] = s.show_webp;
     j["show_mp4"] = s.show_mp4;
+    j["show_wmv"] = s.show_wmv;
+    j["show_avi"] = s.show_avi;
     j["show_png"] = s.show_png;
     j["show_jpeg"] = s.show_jpeg;
     j["sort_key"] = sort_key_name(s.sort_key);

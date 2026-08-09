@@ -9,9 +9,15 @@ namespace meguri::core {
 enum class MediaType {
     Webp,
     Mp4,
+    Wmv,
+    Avi,
     Png,   // 静止画。1 フレームだけの動画として扱う
     Jpeg,  // 静止画 (.jpg / .jpeg)
 };
+
+inline bool is_media_foundation_video(MediaType type) {
+    return type == MediaType::Mp4 || type == MediaType::Wmv || type == MediaType::Avi;
+}
 
 // 走査済みメディアファイル 1 件分のメタデータ。
 // width/height/duration はデコーダによるプローブ後に埋まる (未プローブ時は 0)。

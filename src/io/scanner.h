@@ -9,6 +9,8 @@
 namespace meguri::io {
 
 struct ScanOptions {
+    bool include_wmv = true;
+    bool include_avi = true;
     bool recursive = true;  // サブフォルダも走査する (既定オン)
 };
 

@@ -215,7 +215,7 @@ void PlaybackEngine::maybe_upgrade_software_tiles() {
     for (int index : active_indices_) {
         if (index < 0 || index >= tile_count()) continue;
         auto& t = tiles_[index];
-        if (t->item.type != core::MediaType::Mp4) continue;
+        if (!core::is_media_foundation_video(t->item.type)) continue;
         if (t->hardware || t->failed || t->job_pending.load()) continue;
         if (t->latest_version == 0) continue;  // まだ一度も再生できていないものは対象外
 

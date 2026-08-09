@@ -249,6 +249,42 @@ TEST_CASE(filter_by_type) {
     CHECK_EQ(order[1], 2);
 }
 
+TEST_CASE(filter_legacy_video_default_off) {
+    std::vector<MediaItem> items(3);
+    items[0].path = L"c:\\a.mp4";
+    items[0].type = MediaType::Mp4;
+    items[1].path = L"c:\\b.wmv";
+    items[1].type = MediaType::Wmv;
+    items[2].path = L"c:\\c.avi";
+    items[2].type = MediaType::Avi;
+
+    FilterOptions filter;
+    SortOptions sort;
+    const auto order = build_display_order(items, filter, sort);
+    CHECK_EQ(static_cast<int>(order.size()), 1);
+    CHECK_EQ(order[0], 0);
+}
+
+TEST_CASE(filter_legacy_video_enabled) {
+    std::vector<MediaItem> items(3);
+    items[0].path = L"c:\\a.mp4";
+    items[0].type = MediaType::Mp4;
+    items[1].path = L"c:\\b.wmv";
+    items[1].type = MediaType::Wmv;
+    items[2].path = L"c:\\c.avi";
+    items[2].type = MediaType::Avi;
+
+    FilterOptions filter;
+    filter.show_wmv = true;
+    filter.show_avi = true;
+    SortOptions sort;
+    const auto order = build_display_order(items, filter, sort);
+    CHECK_EQ(static_cast<int>(order.size()), 3);
+    CHECK_EQ(order[0], 0);
+    CHECK_EQ(order[1], 1);
+    CHECK_EQ(order[2], 2);
+}
+
 TEST_CASE(sort_by_size_descending) {
     const auto items = make_items();
     FilterOptions filter;

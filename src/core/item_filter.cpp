@@ -12,6 +12,8 @@ std::vector<int> build_display_order(const std::vector<MediaItem>& items,
         const MediaType t = items[i].type;
         if (t == MediaType::Webp && !filter.show_webp) continue;
         if (t == MediaType::Mp4 && !filter.show_mp4) continue;
+        if (t == MediaType::Wmv && !filter.show_wmv) continue;
+        if (t == MediaType::Avi && !filter.show_avi) continue;
         if (t == MediaType::Png && !filter.show_png) continue;
         if (t == MediaType::Jpeg && !filter.show_jpeg) continue;
         order.push_back(i);
