@@ -1,13 +1,16 @@
 cmake_minimum_required(VERSION 3.25)
 
 project(Meguri
-    VERSION 0.1.0
+    VERSION 0.2.0
     DESCRIPTION "Meguri - Animated WebP / MP4 bulk viewer & organizer"
     LANGUAGES C CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+set(MEGURI_VERSION_COMMA "${PROJECT_VERSION_MAJOR},${PROJECT_VERSION_MINOR},${PROJECT_VERSION_PATCH},0")
+set(MEGURI_ICON_RC_PATH "${PROJECT_SOURCE_DIR}/assets/app.ico")
 
 # /W4 は自前コードのディレクトリ側で付与する (third_party に警告を出さないため)
 if(MSVC)
