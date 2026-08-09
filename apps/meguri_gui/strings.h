@@ -49,6 +49,7 @@ enum class Str {
     MenuDebugOverlay,
     MenuSeekbar,
     MenuShowFilenames,
+    MenuCopyComfyMetadata,
     MenuIntroOffset,
     MenuGridAudio,
     MenuGpuMemory,
@@ -63,6 +64,11 @@ enum class Str {
     RowHeightLarge,
     RowHeightXLarge,
     RowHeightStatusFmt,  // タイル高さ: %d px (Ctrl+ホイールで調整)
+    StatusNoSelection,
+    StatusCopiedFilesFmt,
+    StatusCopiedComfyMetadata,
+    StatusCopiedFilesNoMetadata,
+    StatusCopyFailed,
     FolderPickTitle,
     LoadFailedTile,  // 読込失敗
 };

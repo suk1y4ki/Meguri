@@ -1,13 +1,17 @@
 #include "main_window.h"
 
 #include <shellapi.h>
+#include <shlobj_core.h>
 #include <shobjidl.h>
 #include <windowsx.h>
 #include <wrl/client.h>
 
 #include <algorithm>
+#include <cstdint>
+#include <cstring>
 
 #include "dark_mode.h"
+#include "io/comfy_metadata.h"
 #include "io/mp4_decoder.h"  // set_gpu_memory_percent
 #include "io/recycle.h"
 #include "io/scanner.h"
@@ -50,7 +54,8 @@ enum : int {
     IDM_INTRO_OFFSET = 247,
     IDM_GRID_AUDIO = 248,
     IDM_SHOW_FILENAMES = 249,
-    IDM_ROWH_SMALL = 250,  // 小 / 中 / 大 / 特大 (連番)
+    IDM_COPY_COMFY_METADATA = 250,
+    IDM_ROWH_SMALL = 251,  // 小 / 中 / 大 / 特大 (連番)
     IDM_ROWH_MEDIUM,
     IDM_ROWH_LARGE,
     IDM_ROWH_XLARGE,
@@ -69,6 +74,66 @@ int statusbar_height(UINT dpi) { return MulDiv(26, dpi, 96); }
 
 COLORREF chrome_color(bool dark) { return dark ? RGB(32, 32, 38) : RGB(243, 243, 245); }
 COLORREF chrome_text_color(bool dark) { return dark ? RGB(230, 230, 235) : RGB(30, 30, 35); }
+
+bool set_clipboard_text(HWND owner, const std::wstring& text) {
+    const SIZE_T bytes = (text.size() + 1) * sizeof(wchar_t);
+    HGLOBAL handle = GlobalAlloc(GMEM_MOVEABLE, bytes);
+    if (!handle) return false;
+    void* mem = GlobalLock(handle);
+    if (!mem) {
+        GlobalFree(handle);
+        return false;
+    }
+    std::memcpy(mem, text.c_str(), bytes);
+    GlobalUnlock(handle);
+
+    if (!OpenClipboard(owner)) {
+        GlobalFree(handle);
+        return false;
+    }
+    EmptyClipboard();
+    const bool ok = SetClipboardData(CF_UNICODETEXT, handle) != nullptr;
+    CloseClipboard();
+    if (!ok) GlobalFree(handle);
+    return ok;
+}
+
+bool set_clipboard_files(HWND owner, const std::vector<std::wstring>& paths) {
+    if (paths.empty()) return false;
+
+    size_t char_count = 1;  // final NUL
+    for (const auto& path : paths) char_count += path.size() + 1;
+    const SIZE_T bytes = sizeof(DROPFILES) + char_count * sizeof(wchar_t);
+
+    HGLOBAL handle = GlobalAlloc(GMEM_MOVEABLE | GMEM_ZEROINIT, bytes);
+    if (!handle) return false;
+    auto* drop = static_cast<DROPFILES*>(GlobalLock(handle));
+    if (!drop) {
+        GlobalFree(handle);
+        return false;
+    }
+
+    drop->pFiles = sizeof(DROPFILES);
+    drop->fWide = TRUE;
+    wchar_t* out = reinterpret_cast<wchar_t*>(reinterpret_cast<BYTE*>(drop) + sizeof(DROPFILES));
+    for (const auto& path : paths) {
+        std::memcpy(out, path.c_str(), path.size() * sizeof(wchar_t));
+        out += path.size();
+        *out++ = L'\0';
+    }
+    *out = L'\0';
+    GlobalUnlock(handle);
+
+    if (!OpenClipboard(owner)) {
+        GlobalFree(handle);
+        return false;
+    }
+    EmptyClipboard();
+    const bool ok = SetClipboardData(CF_HDROP, handle) != nullptr;
+    CloseClipboard();
+    if (!ok) GlobalFree(handle);
+    return ok;
+}
 
 }  // namespace
 
@@ -186,6 +251,7 @@ void MainWindow::on_create() {
     grid_.on_selection_changed = [this] { update_status(); };
     grid_.on_delete_requested = [this] { delete_selection(); };
     grid_.on_undo_requested = [this] { undo_delete(); };
+    grid_.on_copy_requested = [this] { copy_selection(); };
     grid_.on_row_height_wheel = [this](int notches) {
         // 1 ノッチで約 10% 拡縮。80〜800px にクランプ
         double height = settings_.target_row_height;
@@ -512,6 +578,10 @@ void MainWindow::on_command(int id) {
             update_status();
             rebuild_menu();
             return;
+        case IDM_COPY_COMFY_METADATA:
+            settings_.copy_comfy_metadata = !settings_.copy_comfy_metadata;
+            rebuild_menu();
+            return;
         case IDM_INTRO_OFFSET:
             settings_.intro_offset = !settings_.intro_offset;
             engine_.set_intro_offset(settings_.intro_offset);
@@ -727,6 +797,55 @@ void MainWindow::undo_delete() {
     set_status(text);
 }
 
+void MainWindow::copy_selection() {
+    std::vector<int> indices;
+    if (grid_.zoomed()) {
+        const int current = grid_.current_engine_index();
+        if (current >= 0) indices.push_back(current);
+    } else {
+        indices = grid_.selected_engine_indices();
+    }
+
+    std::vector<std::wstring> paths;
+    paths.reserve(indices.size());
+    for (int index : indices) {
+        if (index >= 0 && index < static_cast<int>(library_.size())) {
+            paths.push_back(library_[index].path);
+        }
+    }
+
+    if (paths.empty()) {
+        set_status(tr(Str::StatusNoSelection));
+        return;
+    }
+
+    if (settings_.copy_comfy_metadata) {
+        for (const auto& path : paths) {
+            const io::ComfyMetadata metadata = io::extract_comfy_metadata(path);
+            if (metadata.kind != io::ComfyMetadataKind::None && !metadata.json.empty()) {
+                if (set_clipboard_text(hwnd_, app::widen(metadata.json))) {
+                    set_status(tr(Str::StatusCopiedComfyMetadata));
+                } else {
+                    set_status(tr(Str::StatusCopyFailed));
+                }
+                return;
+            }
+        }
+    }
+
+    if (set_clipboard_files(hwnd_, paths)) {
+        if (settings_.copy_comfy_metadata) {
+            set_status(tr(Str::StatusCopiedFilesNoMetadata));
+        } else {
+            wchar_t text[128];
+            swprintf(text, 128, tr(Str::StatusCopiedFilesFmt), static_cast<int>(paths.size()));
+            set_status(text);
+        }
+    } else {
+        set_status(tr(Str::StatusCopyFailed));
+    }
+}
+
 void MainWindow::rebuild_menu() {
     HMENU bar = CreateMenu();
     HMENU options = CreatePopupMenu();
@@ -817,6 +936,8 @@ void MainWindow::rebuild_menu() {
                 tr(Str::MenuSeekbar));
     AppendMenuW(options, MF_STRING | (settings_.show_filenames ? MF_CHECKED : 0),
                 IDM_SHOW_FILENAMES, tr(Str::MenuShowFilenames));
+    AppendMenuW(options, MF_STRING | (settings_.copy_comfy_metadata ? MF_CHECKED : 0),
+                IDM_COPY_COMFY_METADATA, tr(Str::MenuCopyComfyMetadata));
     AppendMenuW(options, MF_STRING | (settings_.intro_offset ? MF_CHECKED : 0),
                 IDM_INTRO_OFFSET, tr(Str::MenuIntroOffset));
     AppendMenuW(options, MF_STRING | (settings_.grid_audio ? MF_CHECKED : 0), IDM_GRID_AUDIO,

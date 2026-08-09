@@ -15,6 +15,7 @@ unwanted files to the Recycle Bin.
 - Show PNG/JPEG images in the same grid with the same select, zoom, delete, and restore operations
 - Select with click, Ctrl+click, Shift+click, and Ctrl+A
 - Move selected files to the Recycle Bin with Del, and restore the last delete batch with Ctrl+Z
+- Copy selected or zoomed files with Ctrl+C, with an option to prefer ComfyUI metadata
 - Open a single item in zoom view with double-click or Enter
 - Seek, play/pause, move between items, delete-and-advance, and play audio in zoom view
 - Optional experimental audio playback for videos visible in the grid
@@ -37,6 +38,7 @@ Start `Meguri.exe`, then open or drop a media folder.
 | Ctrl+A | Select all visible items |
 | Del | Move selected items to the Recycle Bin |
 | Ctrl+Z | Restore the last delete batch |
+| Ctrl+C | Copy selected items |
 | Double-click / Enter | Open zoom view |
 | Esc / double-click in zoom view | Return to grid view |
 | Arrow keys / wheel in zoom view | Move to the previous or next item |

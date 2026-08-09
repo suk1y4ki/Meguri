@@ -74,6 +74,8 @@ const Entry& entry_for(Str id) {
         {L"拡大表示でシークバーを表示", L"Show seek bar in zoom view"},
         /* MenuShowFilenames */
         {L"選択ファイル名をステータスバーに表示", L"Show selected file name in status bar"},
+        /* MenuCopyComfyMetadata */
+        {L"Ctrl+C で ComfyUI メタデータをコピー", L"Copy ComfyUI metadata with Ctrl+C"},
         /* MenuIntroOffset */
         {L"イントロを飛ばす (5 分以上は 3:00 から)", L"Skip intro (5min+ starts at 3:00)"},
         /* MenuGridAudio */
@@ -95,6 +97,15 @@ const Entry& entry_for(Str id) {
         /* RowHeightXLarge */ {L"特大", L"Extra large"},
         /* RowHeightStatusFmt */
         {L"タイル高さ: %d px (Ctrl+ホイールで調整)", L"Tile height: %d px (Ctrl+wheel to adjust)"},
+        /* StatusNoSelection */ {L"コピーするファイルが選択されていません", L"No file selected to copy"},
+        /* StatusCopiedFilesFmt */
+        {L"%d 件のファイルをコピーしました", L"Copied %d file(s)"},
+        /* StatusCopiedComfyMetadata */
+        {L"ComfyUI メタデータをコピーしました", L"Copied ComfyUI metadata"},
+        /* StatusCopiedFilesNoMetadata */
+        {L"ComfyUI メタデータが見つからないため、ファイルをコピーしました",
+         L"No ComfyUI metadata found; copied file(s) instead"},
+        /* StatusCopyFailed */ {L"コピーに失敗しました", L"Failed to copy"},
         /* FolderPickTitle */ {L"表示するフォルダを選択", L"Select a folder to view"},
         /* LoadFailedTile */ {L"読込失敗", L"Load failed"},
     };

@@ -61,6 +61,9 @@ struct Settings {
     // 選択中ファイル名をステータスバーに表示
     bool show_filenames = false;
 
+    // Ctrl+C で ComfyUI メタデータを優先コピーする
+    bool copy_comfy_metadata = true;
+
     // ズーム中の音声 (単体再生時のみ音を出す)
     int audio_volume = 60;     // 0〜100
     bool audio_muted = false;

@@ -20,13 +20,14 @@ add_library(meguri_io STATIC
     io/image_decoder.cpp
     io/d3d_video.cpp
     io/audio_player.cpp
+    io/comfy_metadata.cpp
     io/probe.cpp
     io/recycle.cpp
     io/sample_gen.cpp
 )
 target_include_directories(meguri_io PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(meguri_io PUBLIC meguri_core)
-target_link_libraries(meguri_io PRIVATE webp)
+target_link_libraries(meguri_io PRIVATE webp nlohmann_json)
 
 add_library(meguri_app STATIC
     app/settings.cpp

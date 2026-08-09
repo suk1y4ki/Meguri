@@ -299,6 +299,18 @@ std::vector<int> GridView::selected_engine_indices() const {
     return result;
 }
 
+int GridView::current_engine_index() const {
+    if (zoomed()) {
+        if (zoom_display_index_ >= 0 &&
+            zoom_display_index_ < static_cast<int>(display_order_.size())) {
+            return display_order_[zoom_display_index_];
+        }
+        return -1;
+    }
+    const auto selected = selected_engine_indices();
+    return selected.empty() ? -1 : selected.front();
+}
+
 void GridView::clear_selection() {
     selection_.clear();
     if (on_selection_changed) on_selection_changed();
@@ -526,6 +538,9 @@ void GridView::handle_key(WPARAM key) {
             case VK_RIGHT: zoom_step(1); break;
             case VK_SPACE: toggle_zoom_pause(); break;
             case VK_ESCAPE: exit_zoom(); break;
+            case 'C':
+                if (ctrl && on_copy_requested) on_copy_requested();
+                break;
             case VK_DELETE:
                 // ズーム中の Del は表示中の 1 件を削除し、次のアイテムが表示される
                 if (on_delete_requested) on_delete_requested();
@@ -549,6 +564,9 @@ void GridView::handle_key(WPARAM key) {
                 selection_.select_all(static_cast<int>(display_order_.size()));
                 if (on_selection_changed) on_selection_changed();
             }
+            break;
+        case 'C':
+            if (ctrl && on_copy_requested) on_copy_requested();
             break;
         case VK_ESCAPE:
             clear_selection();

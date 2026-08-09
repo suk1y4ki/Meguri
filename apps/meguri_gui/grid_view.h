@@ -61,6 +61,7 @@ public:
 
     // 選択 (display index -> engine index に解決して返す)
     std::vector<int> selected_engine_indices() const;
+    int current_engine_index() const;
     size_t selection_count() const { return selection_.size(); }
     void clear_selection();
 
@@ -68,6 +69,7 @@ public:
     std::function<void()> on_selection_changed;
     std::function<void()> on_delete_requested;
     std::function<void()> on_undo_requested;
+    std::function<void()> on_copy_requested;
     std::function<void(int)> on_row_height_wheel;  // Ctrl+ホイール (ノッチ数, 正=拡大)
 
     // 現在のビューを PNG に保存する (WIC レンダーターゲット使用。

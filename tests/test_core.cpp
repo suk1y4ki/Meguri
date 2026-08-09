@@ -6,6 +6,11 @@
 #include "core/playback.h"
 #include "core/scheduler.h"
 #include "core/selection.h"
+#include "io/comfy_metadata.h"
+
+#include <array>
+#include <filesystem>
+#include <fstream>
 
 using namespace meguri::core;
 
@@ -296,6 +301,206 @@ TEST_CASE(sort_by_size_descending) {
     CHECK_EQ(order[1], 0);  // 300
     CHECK_EQ(order[2], 2);  // 200
     CHECK_EQ(order[3], 1);  // 100
+}
+
+// ---- ComfyUI metadata ----
+
+namespace {
+void append_u32_be(std::vector<unsigned char>* out, uint32_t value) {
+    out->push_back(static_cast<unsigned char>((value >> 24) & 0xff));
+    out->push_back(static_cast<unsigned char>((value >> 16) & 0xff));
+    out->push_back(static_cast<unsigned char>((value >> 8) & 0xff));
+    out->push_back(static_cast<unsigned char>(value & 0xff));
+}
+
+void append_u16_le(std::vector<unsigned char>* out, uint16_t value) {
+    out->push_back(static_cast<unsigned char>(value & 0xff));
+    out->push_back(static_cast<unsigned char>((value >> 8) & 0xff));
+}
+
+void append_u32_le(std::vector<unsigned char>* out, uint32_t value) {
+    out->push_back(static_cast<unsigned char>(value & 0xff));
+    out->push_back(static_cast<unsigned char>((value >> 8) & 0xff));
+    out->push_back(static_cast<unsigned char>((value >> 16) & 0xff));
+    out->push_back(static_cast<unsigned char>((value >> 24) & 0xff));
+}
+
+void append_chunk(std::vector<unsigned char>* out, const char* type,
+                  const std::vector<unsigned char>& data) {
+    append_u32_be(out, static_cast<uint32_t>(data.size()));
+    for (int i = 0; i < 4; ++i) out->push_back(static_cast<unsigned char>(type[i]));
+    out->insert(out->end(), data.begin(), data.end());
+    append_u32_be(out, 0);  // CRC is not validated by the metadata scanner.
+}
+
+void append_box(std::vector<unsigned char>* out, const std::array<unsigned char, 4>& type,
+                const std::vector<unsigned char>& payload) {
+    append_u32_be(out, static_cast<uint32_t>(payload.size() + 8));
+    out->insert(out->end(), type.begin(), type.end());
+    out->insert(out->end(), payload.begin(), payload.end());
+}
+
+std::vector<unsigned char> make_box(const std::array<unsigned char, 4>& type,
+                                    const std::vector<unsigned char>& payload) {
+    std::vector<unsigned char> box;
+    append_box(&box, type, payload);
+    return box;
+}
+
+std::filesystem::path write_test_png(const char* name, const std::vector<unsigned char>& bytes) {
+    const std::filesystem::path path = std::filesystem::temp_directory_path() / name;
+    std::ofstream file(path, std::ios::binary | std::ios::trunc);
+    file.write(reinterpret_cast<const char*>(bytes.data()),
+               static_cast<std::streamsize>(bytes.size()));
+    return path;
+}
+
+std::vector<unsigned char> text_chunk_data(const std::string& key, const std::string& text) {
+    std::vector<unsigned char> data(key.begin(), key.end());
+    data.push_back(0);
+    data.insert(data.end(), text.begin(), text.end());
+    return data;
+}
+
+std::vector<unsigned char> data_box_payload(const std::string& text) {
+    std::vector<unsigned char> data = {0, 0, 0, 1, 0, 0, 0, 0};
+    data.insert(data.end(), text.begin(), text.end());
+    return data;
+}
+
+std::vector<unsigned char> metadata_keys_payload(const std::vector<std::string>& keys) {
+    std::vector<unsigned char> data = {0, 0, 0, 0};  // version/flags
+    append_u32_be(&data, static_cast<uint32_t>(keys.size()));
+    for (const auto& key : keys) {
+        append_u32_be(&data, static_cast<uint32_t>(key.size() + 8));
+        data.insert(data.end(), {'m', 'd', 't', 'a'});
+        data.insert(data.end(), key.begin(), key.end());
+    }
+    return data;
+}
+
+std::vector<unsigned char> indexed_metadata_item(uint32_t index, const std::string& text) {
+    const auto data = make_box({'d', 'a', 't', 'a'}, data_box_payload(text));
+    return make_box({static_cast<unsigned char>((index >> 24) & 0xff),
+                     static_cast<unsigned char>((index >> 16) & 0xff),
+                     static_cast<unsigned char>((index >> 8) & 0xff),
+                     static_cast<unsigned char>(index & 0xff)},
+                    data);
+}
+
+std::vector<unsigned char> webp_exif_payload(const std::string& text) {
+    std::vector<unsigned char> tiff = {'I', 'I'};
+    append_u16_le(&tiff, 42);
+    append_u32_le(&tiff, 8);
+    append_u16_le(&tiff, 1);
+    append_u16_le(&tiff, 270);
+    append_u16_le(&tiff, 2);
+    append_u32_le(&tiff, static_cast<uint32_t>(text.size() + 1));
+    append_u32_le(&tiff, 8 + 2 + 12 + 4);
+    append_u32_le(&tiff, 0);
+    tiff.insert(tiff.end(), text.begin(), text.end());
+    tiff.push_back(0);
+
+    std::vector<unsigned char> payload = {'E', 'x', 'i', 'f', 0, 0};
+    payload.insert(payload.end(), tiff.begin(), tiff.end());
+    return payload;
+}
+
+void append_riff_chunk(std::vector<unsigned char>* out, const char* type,
+                       const std::vector<unsigned char>& data) {
+    for (int i = 0; i < 4; ++i) out->push_back(static_cast<unsigned char>(type[i]));
+    append_u32_le(out, static_cast<uint32_t>(data.size()));
+    out->insert(out->end(), data.begin(), data.end());
+    if (data.size() % 2 == 1) out->push_back(0);
+}
+}  // namespace
+
+TEST_CASE(comfy_png_metadata_prefers_workflow) {
+    std::vector<unsigned char> bytes = {0x89, 'P', 'N', 'G', '\r', '\n', 0x1a, '\n'};
+    append_chunk(&bytes, "tEXt", text_chunk_data("prompt", "{\"api\":true}"));
+    append_chunk(&bytes, "tEXt", text_chunk_data("workflow", "{\"version\":1}"));
+    append_chunk(&bytes, "IEND", {});
+
+    const auto path = write_test_png("meguri_comfy_workflow.png", bytes);
+    const auto metadata = meguri::io::extract_comfy_metadata(path.wstring());
+    CHECK(metadata.kind == meguri::io::ComfyMetadataKind::Workflow);
+    CHECK(metadata.json == "{\"version\":1}");
+    std::filesystem::remove(path);
+}
+
+TEST_CASE(comfy_png_metadata_uses_prompt_fallback) {
+    std::vector<unsigned char> bytes = {0x89, 'P', 'N', 'G', '\r', '\n', 0x1a, '\n'};
+    append_chunk(&bytes, "tEXt", text_chunk_data("prompt", "{\"api\":true}"));
+    append_chunk(&bytes, "IEND", {});
+
+    const auto path = write_test_png("meguri_comfy_prompt.png", bytes);
+    const auto metadata = meguri::io::extract_comfy_metadata(path.wstring());
+    CHECK(metadata.kind == meguri::io::ComfyMetadataKind::Prompt);
+    CHECK(metadata.json == "{\"api\":true}");
+    std::filesystem::remove(path);
+}
+
+TEST_CASE(comfy_mp4_mdta_metadata_prefers_workflow) {
+    const auto keys = make_box({'k', 'e', 'y', 's'},
+                               metadata_keys_payload({"prompt", "workflow"}));
+    const auto prompt = indexed_metadata_item(1, "{\"api\":true}");
+    const auto workflow = indexed_metadata_item(2, "{\"version\":1}");
+    std::vector<unsigned char> ilst_payload = prompt;
+    ilst_payload.insert(ilst_payload.end(), workflow.begin(), workflow.end());
+    const auto ilst = make_box({'i', 'l', 's', 't'}, ilst_payload);
+
+    std::vector<unsigned char> meta_payload = {0, 0, 0, 0};
+    meta_payload.insert(meta_payload.end(), keys.begin(), keys.end());
+    meta_payload.insert(meta_payload.end(), ilst.begin(), ilst.end());
+    const auto meta = make_box({'m', 'e', 't', 'a'}, meta_payload);
+    const auto udta = make_box({'u', 'd', 't', 'a'}, meta);
+    const auto moov = make_box({'m', 'o', 'o', 'v'}, udta);
+
+    std::vector<unsigned char> bytes;
+    append_box(&bytes, {'f', 't', 'y', 'p'}, {'i', 's', 'o', 'm', 0, 0, 0, 0});
+    bytes.insert(bytes.end(), moov.begin(), moov.end());
+
+    const auto path = write_test_png("meguri_comfy_video_mdta.mp4", bytes);
+    const auto metadata = meguri::io::extract_comfy_metadata(path.wstring());
+    CHECK(metadata.kind == meguri::io::ComfyMetadataKind::Workflow);
+    CHECK(metadata.json == "{\"version\":1}");
+    std::filesystem::remove(path);
+}
+
+TEST_CASE(comfy_mp4_comment_metadata_legacy_fallback) {
+    const std::string combined = "{\"prompt\":{\"api\":true},\"workflow\":{\"version\":1}}";
+    const auto data = make_box({'d', 'a', 't', 'a'}, data_box_payload(combined));
+    const auto comment = make_box({0xa9, 'c', 'm', 't'}, data);
+    const auto ilst = make_box({'i', 'l', 's', 't'}, comment);
+    std::vector<unsigned char> meta_payload = {0, 0, 0, 0};
+    meta_payload.insert(meta_payload.end(), ilst.begin(), ilst.end());
+    const auto meta = make_box({'m', 'e', 't', 'a'}, meta_payload);
+    const auto udta = make_box({'u', 'd', 't', 'a'}, meta);
+    const auto moov = make_box({'m', 'o', 'o', 'v'}, udta);
+
+    std::vector<unsigned char> bytes;
+    append_box(&bytes, {'f', 't', 'y', 'p'}, {'i', 's', 'o', 'm', 0, 0, 0, 0});
+    bytes.insert(bytes.end(), moov.begin(), moov.end());
+
+    const auto path = write_test_png("meguri_comfy_video.mp4", bytes);
+    const auto metadata = meguri::io::extract_comfy_metadata(path.wstring());
+    CHECK(metadata.kind == meguri::io::ComfyMetadataKind::Workflow);
+    CHECK(metadata.json == "{\"version\":1}");
+    std::filesystem::remove(path);
+}
+
+TEST_CASE(comfy_webp_exif_metadata_reads_workflow) {
+    std::vector<unsigned char> bytes = {'R', 'I', 'F', 'F'};
+    std::vector<unsigned char> body = {'W', 'E', 'B', 'P'};
+    append_riff_chunk(&body, "EXIF", webp_exif_payload("workflow:{\"version\":1}"));
+    append_u32_le(&bytes, static_cast<uint32_t>(body.size()));
+    bytes.insert(bytes.end(), body.begin(), body.end());
+
+    const auto path = write_test_png("meguri_comfy_webp.webp", bytes);
+    const auto metadata = meguri::io::extract_comfy_metadata(path.wstring());
+    CHECK(metadata.kind == meguri::io::ComfyMetadataKind::Workflow);
+    CHECK(metadata.json == "{\"version\":1}");
+    std::filesystem::remove(path);
 }
 
 int main() { return meguri_test::run_all(); }

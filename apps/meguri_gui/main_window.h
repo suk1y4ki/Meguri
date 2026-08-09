@@ -42,6 +42,7 @@ private:
 
     void delete_selection();
     void undo_delete();
+    void copy_selection();
 
     void rebuild_menu();
     void apply_language();
